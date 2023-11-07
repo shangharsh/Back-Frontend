@@ -2,16 +2,15 @@ import { TextField } from '@mui/material';
 import Button from '@mui/material/Button';
 import {Row, Col, Form} from 'react-bootstrap';
 import {useState} from 'react';
-import { errorToast, successToast, warningToast } from '../../../services/toaster.service';
-import axios from 'axios';
+import {successToast, warningToast } from '../../../services/toaster.service';
 import { useNavigate } from 'react-router-dom';
+import { postData } from '../../../services/axios.service';
 
 const SignUp = () => {
   const [name,setName] = useState('');
   const [email,setEmail] = useState('');
   const [password,setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [isLoading,setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -24,21 +23,13 @@ const SignUp = () => {
       const data = {
         name,password,email
       };
-      
-      try{
-        const response = await axios.post('http://localhost:8080/api/v1/auth/register',data);
-
-      if(response.data.status){
+        const response = await postData('/auth/register',data);
+      if(response.status){
         navigate('/');
-        successToast(response.data.message);
-      }
-      }
-      catch(error:any){
-        errorToast(error.response.data.error)
+        successToast(response.message);
       }
     }
   };
-
 
   return (
       <Row className='d-flex justify-content-center align-items-center'>
