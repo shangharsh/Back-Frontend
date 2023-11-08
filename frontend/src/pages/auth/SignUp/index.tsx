@@ -16,7 +16,6 @@ const SignUp = () => {
 
   const registerSubmitHandler = async (e: any) =>{
     e.preventDefault();
-    console.log(name,email,password);
     if(password !== confirmPassword){
       warningToast('Password and Confirm Password must be same.');
     }else{

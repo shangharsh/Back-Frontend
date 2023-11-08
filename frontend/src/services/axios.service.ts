@@ -10,3 +10,12 @@ export const postData = async (url: string, data: any)=>{
         errorToast(error.response.data.error);
     }
 }
+
+export const getData = async (url: string)=>{
+    try{
+        const resp = await axios.get(`${config.SERVER_URL}${url}`);
+        return resp.data;
+    }catch (error: any){
+        errorToast(error.response.data.error);
+    }
+}

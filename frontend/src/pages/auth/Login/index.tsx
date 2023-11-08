@@ -1,6 +1,6 @@
 import { TextField } from '@mui/material';
 import Button from '@mui/material/Button';
-import { Formik, Field, ErrorMessage } from 'formik';
+import { Formik } from 'formik';
 import {Row, Col, Form} from 'react-bootstrap';
 import {object, string} from 'yup';
 import { AuthInterface } from '../../../interface/auth.interface';
@@ -42,7 +42,7 @@ const Login = () => {
   return (
     <Row className='d-flex justify-content-center align-items-center'>
         <Col xs={12} md={6}>
-        <h1 className='fs-4'>Sign Up</h1>
+        <h1 className='fs-4'>Sign In</h1>
         <Formik onSubmit={loginHandler} initialValues={initialValues} validationSchema={authValidationSchema}>
         {({handleChange, handleSubmit, touched, errors})=>(
           <Form onSubmit={handleSubmit}>
