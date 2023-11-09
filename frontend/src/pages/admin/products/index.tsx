@@ -14,6 +14,10 @@ import { FaEdit } from "react-icons/fa";
 import { AiFillDelete } from "react-icons/ai";
 import {Button} from 'react-bootstrap';
 import moment from 'moment';
+import { useSelector } from 'react-redux';
+import axios from 'axios';
+import { config } from '../../../config';
+import { errorToast } from '../../../services/toaster.service';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -39,6 +43,8 @@ const Products=()=> {
 
   const [products, setProducts] = useState<any>({});
   const [isLoading, setIsLoading] = useState(false);
+
+  const {jwt} = useSelector((state: any)=> state.auth);
   const getProducts = async () =>{
     setIsLoading(true);
     const resp = await getData('/product');
@@ -49,6 +55,26 @@ const Products=()=> {
   useEffect(() =>{
     getProducts();
   },[]);
+
+  const deleteProduct = async (id: string) =>{
+    console.log(id);
+    try{
+      const response = await axios.delete(`${config.SERVER_URL}/product/${id}`,{
+        headers:{
+          Authorization: `Bearer ${jwt}`,
+        },
+      });
+
+      const deleteHandler = products.results.filter((product: any)=>{
+        return product.id !== id;
+      });
+      setProducts((prev: any)=>{
+        return {...prev,results:deleteHandler, count:deleteHandler.length};
+      });
+    } catch (error: any){
+      errorToast(error.response.data.error);
+    }
+  };
 
 
   return (
@@ -86,7 +112,7 @@ const Products=()=> {
                       <Button variant='primary' className='me-1'>
                         <FaEdit/>
                       </Button>
-                      <Button variant='danger' className='ms-1'>
+                      <Button variant='danger' className='ms-1' onClick={(e)=>deleteProduct(product.id)}>
                         <AiFillDelete/>
                       </Button>
                   </StyledTableCell>
