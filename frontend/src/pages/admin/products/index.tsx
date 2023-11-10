@@ -12,12 +12,14 @@ import { getData } from '../../../services/axios.service';
 import Loader from '../../../components/Loader';
 import { FaEdit } from "react-icons/fa";
 import { AiFillDelete } from "react-icons/ai";
-import {Button} from 'react-bootstrap';
+import {Button, Container} from 'react-bootstrap';
 import moment from 'moment';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
 import { config } from '../../../config';
-import { errorToast } from '../../../services/toaster.service';
+import { errorToast, successToast } from '../../../services/toaster.service';
+import ProductFormModal from '../../../components/admin/forms/ProductFormModal';
+
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -42,13 +44,38 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 const Products=()=> {
 
   const [products, setProducts] = useState<any>({});
+  const [product, setProduct] = useState({
+    name: '',
+    brand: '',
+    price: '',
+    description: '',
+    category: '',
+    productImage: '',
+    countInStock: '',
+  });
   const [isLoading, setIsLoading] = useState(false);
+  const [isSpinning, setIsSpinning] = useState(false);
+  const [categories, setCategories] = useState<any>([]);
+
+  const [open, setOpen] = useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   const {jwt} = useSelector((state: any)=> state.auth);
   const getProducts = async () =>{
     setIsLoading(true);
     const resp = await getData('/product');
     setProducts(resp.data);
+    const newCategories = resp.data.results.map((result: any)=>{
+      return result.category;
+    })
+    setCategories([...new Set(newCategories)]);
     setIsLoading(false);
   }
 
@@ -56,7 +83,16 @@ const Products=()=> {
     getProducts();
   },[]);
 
-  const deleteProduct = async (id: string) =>{
+  const handleChange = (e: any) =>{
+    setProduct((prev)=>{
+      return {
+        ...prev, [e.target.name]: e.target.name === 'productImage'? e.target.files[0]: e.target.value,
+      };
+    })
+  }
+
+  const deleteProduct = async (e: any, id: string) =>{
+    e.preventDefault();
     console.log(id);
     try{
       const response = await axios.delete(`${config.SERVER_URL}/product/${id}`,{
@@ -71,8 +107,46 @@ const Products=()=> {
       setProducts((prev: any)=>{
         return {...prev,results:deleteHandler, count:deleteHandler.length};
       });
+      successToast('Product Deleted Successfully');
+      console.log(response)
     } catch (error: any){
       errorToast(error.response.data.error);
+    }
+  };
+
+  const handleSubmit = async (e:any) =>{
+    e.preventDefault();
+    setIsSpinning(true);
+    const formData = new FormData();
+    formData.append('name', product.name);
+    formData.append('price', product.price);
+    formData.append('category', product.category);
+    formData.append('brand', product.brand);
+    formData.append('description', product.description);
+    formData.append('productImage', product.productImage);
+    formData.append('countInStock', product.countInStock);
+
+    try{
+      const {data} = await axios.post(`${config.SERVER_URL}/product`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      })
+  
+  
+      if (data.status === 'success'){
+        setProducts((prev:any)=>{
+          return {...prev, results: [data.data, ...prev.results]};
+        });
+        successToast('Product Added Successfully');
+        setOpen(false);
+        setIsSpinning(false);
+      }
+    }catch(error: any){
+      errorToast(error.response.data.error);
+      setIsSpinning(false);
     }
   };
 
@@ -82,6 +156,8 @@ const Products=()=> {
       {
         isLoading?(<Loader/>):(
           <>
+          <Container>
+          <Button variant='primary' className='text-center mt-2 mb-2' onClick={handleClickOpen}> Add Product</Button>
           {products.status === 'success' && (
             <Table sx={{ minWidth: 100 }} aria-label="customized table">
             <TableHead>
@@ -112,7 +188,7 @@ const Products=()=> {
                       <Button variant='primary' className='me-1'>
                         <FaEdit/>
                       </Button>
-                      <Button variant='danger' className='ms-1' onClick={(e)=>deleteProduct(product.id)}>
+                      <Button variant='danger' className='ms-1' onClick={(e)=>deleteProduct(e,product.id)}>
                         <AiFillDelete/>
                       </Button>
                   </StyledTableCell>
@@ -123,6 +199,9 @@ const Products=()=> {
             </TableBody>
           </Table>
           )}
+          <ProductFormModal open={open} handleClose={handleClose} categories={categories}
+          handleChange={handleChange} handleSubmit={handleSubmit} isSpinning={isSpinning}/>
+          </Container>
           </>
         )
       }
