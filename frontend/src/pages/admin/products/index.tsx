@@ -19,6 +19,7 @@ import axios from 'axios';
 import { config } from '../../../config';
 import { errorToast, successToast } from '../../../services/toaster.service';
 import ProductFormModal from '../../../components/admin/forms/ProductFormModal';
+import NavbarComponent from '../../../components/Navbar';
 
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -206,6 +207,7 @@ const Products=()=> {
         isLoading?(<Loader/>):(
           <>
           <Container>
+            <NavbarComponent/>
           <Button variant='primary' className='text-center mt-2 mb-2' onClick={handleClickOpen}> Add Product</Button>
           {products.status === 'success' && (
             <Table sx={{ minWidth: 100 }} aria-label="customized table">

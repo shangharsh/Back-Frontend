@@ -32,10 +32,16 @@ const Login = () => {
       const data = {
         jwt: resp.token,
         role: resp.authData.role,
-        email: resp.authData.email
+        email: resp.authData.email,
+        name: resp.authData.name
       }
       dispatch(login(data));
-      navigate('/products');
+
+      if(resp.authData.role === 'admin'){
+        navigate('/products');
+      }else if(resp.authData.role === 'user'){
+        navigate('/all/products');
+      }
       successToast('Login '+ resp.status);
     }
   }

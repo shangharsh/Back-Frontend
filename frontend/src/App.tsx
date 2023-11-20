@@ -5,6 +5,7 @@ import PageNotFound from './pages/errors/NotFound/PageNotFound';
 import { ToastContainer } from 'react-toastify';
 import Products from './pages/admin/products';
 import SecureRoute from './routes/SecureRoute';
+import UserProducts from './pages/users/Products';
 
 function App() {
 
@@ -16,6 +17,7 @@ function App() {
 
       <Route path='' element={<SecureRoute/>}>
         <Route path='/products' element={<Products/>}/>
+        <Route path='/all/products' element={<UserProducts/>}/>
       </Route>
 
       <Route path='*' element={<PageNotFound/>}/>

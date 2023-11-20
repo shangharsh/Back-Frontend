@@ -5,6 +5,7 @@ const initialState = {
     jwt: '',
     role: '',
     email: '',
+    name: '',
 };
 
 const authSlice = createSlice({
@@ -17,12 +18,14 @@ const authSlice = createSlice({
             state.jwt = data.payload.jwt;
             state.role = data.payload.role;
             state.email = data.payload.email;
+            state.name = data.payload.name;
         },
         logout: (state) => {
             state.isLoggedIn = false;
             state.jwt = '';
             state.role = '';
             state.email = '';
+            state.name = '';
             localStorage.removeItem('persist:root');
         },
     },
@@ -30,4 +33,4 @@ const authSlice = createSlice({
 
 export default authSlice.reducer;
 
-export const {login} = authSlice.actions;
+export const {login, logout} = authSlice.actions;
