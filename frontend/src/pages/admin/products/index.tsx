@@ -8,7 +8,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import {useEffect, useState} from 'react';
-import { getData } from '../../../services/axios.service';
+import { getData, updateData } from '../../../services/axios.service';
 import Loader from '../../../components/Loader';
 import { FaEdit } from "react-icons/fa";
 import { AiFillDelete } from "react-icons/ai";
@@ -44,7 +44,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 const Products=()=> {
 
   const [products, setProducts] = useState<any>({});
-  const [product, setProduct] = useState({
+  const [product, setProduct] = useState<any>({
     name: '',
     brand: '',
     price: '',
@@ -58,6 +58,7 @@ const Products=()=> {
   const [categories, setCategories] = useState<any>([]);
 
   const [open, setOpen] = useState(false);
+  const [edit, setEdit] = useState(false);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -65,6 +66,16 @@ const Products=()=> {
 
   const handleClose = () => {
     setOpen(false);
+    setEdit(false);
+    setProduct({
+      name: '',
+      brand: '',
+      price: '',
+      description: '',
+      category: '',
+      productImage: '',
+      countInStock: '',
+    });
   };
 
   const {jwt} = useSelector((state: any)=> state.auth);
@@ -84,7 +95,7 @@ const Products=()=> {
   },[]);
 
   const handleChange = (e: any) =>{
-    setProduct((prev)=>{
+    setProduct((prev:any)=>{
       return {
         ...prev, [e.target.name]: e.target.name === 'productImage'? e.target.files[0]: e.target.value,
       };
@@ -108,7 +119,6 @@ const Products=()=> {
         return {...prev,results:deleteHandler, count:deleteHandler.length};
       });
       successToast('Product Deleted Successfully');
-      console.log(response)
     } catch (error: any){
       errorToast(error.response.data.error);
     }
@@ -150,6 +160,45 @@ const Products=()=> {
     }
   };
 
+  interface ProductInterface{
+    name:string;
+    brand:string;
+    category:string;
+    price:string;
+    description:string;
+    productImage:string;
+    countInStock:string;
+  }
+
+  const handleUpdate = async (e: any) =>{
+    e.preventDefault();
+    console.log(product)
+
+    // delete product['id']
+    // delete product['_id']
+    // delete product['createdAt']
+   const resp = await updateData(`/product/${product.id}`, product,jwt);
+
+   if(resp.status==='success'){
+    const updatedProd = products.results.map((prod:any)=>{
+      return prod.id === product.id ? resp.data : prod;
+    })
+    setProducts((prev:any)=>{
+      return {...prev, results: updatedProd}
+    })
+    successToast('Product Updated.')
+    setOpen(false);
+    setEdit(false);
+   }
+  };
+
+  const editProduct = (product: ProductInterface) =>{
+    setOpen(true);
+    setEdit(true);
+    setProduct(product);
+  }
+
+
 
   return (
     <TableContainer component={Paper}>
@@ -185,7 +234,7 @@ const Products=()=> {
                   <StyledTableCell>{product.brand}</StyledTableCell>
                   <StyledTableCell>{moment(product.createdAt).format("YYYY-MM-DD")}</StyledTableCell>
                   <StyledTableCell>
-                      <Button variant='primary' className='me-1'>
+                      <Button variant='primary' className='me-1' onClick={(e)=> editProduct(product)}>
                         <FaEdit/>
                       </Button>
                       <Button variant='danger' className='ms-1' onClick={(e)=>deleteProduct(e,product.id)}>
@@ -200,7 +249,8 @@ const Products=()=> {
           </Table>
           )}
           <ProductFormModal open={open} handleClose={handleClose} categories={categories}
-          handleChange={handleChange} handleSubmit={handleSubmit} isSpinning={isSpinning}/>
+          handleChange={handleChange} handleSubmit={handleSubmit} isSpinning={isSpinning}
+          edit={edit} product={product} handleUpdate={handleUpdate}/>
           </Container>
           </>
         )

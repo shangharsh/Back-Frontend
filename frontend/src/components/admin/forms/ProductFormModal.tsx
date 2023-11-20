@@ -5,16 +5,25 @@ import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
-import { Col, Row } from 'react-bootstrap';
+import { Col, Form, Image, Row } from 'react-bootstrap';
 import { InputLabel, MenuItem, FormControl, Select } from '@mui/material';
 import ButtonSpinner from '../../Loader/Spinner';
 
-const ProductFormModal = ({open, handleClose, categories, handleChange, handleSubmit, isSpinning}: any) => {
+const ProductFormModal = ({open, handleClose,handleUpdate, categories, handleChange, handleSubmit, isSpinning, edit, product}: any) => {
 
   return (
       <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Add Product Form</DialogTitle>
+        <DialogTitle>{edit?'Update Product Form':'Add Product Form'}</DialogTitle>
         <DialogContent>
+          {edit && (
+            <Row className='mb-2'>
+              <Col md={6}>
+              <Form.Label>Product Image</Form.Label>
+              <br/>
+              <Image src={product.productImage} width={100} height={100}/>
+              </Col>
+            </Row>
+          )}
           <Row>
             <Col>
             <TextField
@@ -28,6 +37,7 @@ const ProductFormModal = ({open, handleClose, categories, handleChange, handleSu
             variant="outlined"
             required
             onChange={handleChange}
+            value={product.name}
           />
             </Col>
             <Col>
@@ -42,6 +52,7 @@ const ProductFormModal = ({open, handleClose, categories, handleChange, handleSu
             variant="outlined"
             required
             onChange={handleChange}
+            value={product.price}
           />
             </Col>
           </Row>
@@ -58,6 +69,7 @@ const ProductFormModal = ({open, handleClose, categories, handleChange, handleSu
             variant="outlined"
             required
             onChange={handleChange}
+            value={product.countInStock}
           />
             </Col>
             <Col>
@@ -72,6 +84,7 @@ const ProductFormModal = ({open, handleClose, categories, handleChange, handleSu
             variant="outlined"
             required
             onChange={handleChange}
+            value={product.brand}
           />
             </Col>
           </Row>
@@ -79,7 +92,8 @@ const ProductFormModal = ({open, handleClose, categories, handleChange, handleSu
             <Col>
             <FormControl fullWidth>
                 <InputLabel>Category</InputLabel>
-                <Select label='category' name='category' onChange={handleChange}>
+                <Select label='category' name='category' onChange={handleChange}
+                value={product.category}>
                     {categories.map((category:any)=>{
                         return (
                         <MenuItem key={category} value={category}>{category}</MenuItem>
@@ -100,18 +114,26 @@ const ProductFormModal = ({open, handleClose, categories, handleChange, handleSu
             variant="outlined"
             required
             onChange={handleChange}
+            value={product.description}
           />
             </Col>
           </Row>
-          <Row>
+          {!edit && <Row>
             <Col>
-            <TextField type='file' id='productImage' name='productImage' margin='normal' fullWidth variant='outlined' required onChange={handleChange}/>
+            <TextField type='file' 
+            id='productImage' 
+            name='productImage' 
+            margin='normal' 
+            fullWidth 
+            variant='outlined' 
+            required 
+            onChange={handleChange}/>
             </Col>
-          </Row>
+          </Row>}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button variant='outlined' disabled={isSpinning} onClick={handleSubmit}>{isSpinning?<ButtonSpinner/>: 'submit'}</Button>
+          <Button variant='outlined' disabled={isSpinning} onClick={edit ? handleUpdate:handleSubmit}>{isSpinning?<ButtonSpinner/>: edit ? 'Update':'submit'}</Button>
         </DialogActions>
       </Dialog>
   );
