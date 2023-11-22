@@ -20,6 +20,7 @@ import { config } from '../../../config';
 import { errorToast, successToast } from '../../../services/toaster.service';
 import ProductFormModal from '../../../components/admin/forms/ProductFormModal';
 import NavbarComponent from '../../../components/Navbar';
+import ReactPaginate from "react-paginate";
 
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -56,10 +57,15 @@ const Products=()=> {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
+  const [itemOffset, setItemOffset] = useState(0);
+  const [pageCount, setPageCount] = useState(0);
+  const [originalProduct, setOriginalProduct] = useState<any>({});
   const [categories, setCategories] = useState<any>([]);
 
   const [open, setOpen] = useState(false);
   const [edit, setEdit] = useState(false);
+
+  let itemsPerPage = 3;
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -78,23 +84,46 @@ const Products=()=> {
       countInStock: '',
     });
   };
-
+  
   const {jwt} = useSelector((state: any)=> state.auth);
+
+
   const getProducts = async () =>{
     setIsLoading(true);
     const resp = await getData('/product');
     setProducts(resp.data);
+    setOriginalProduct(resp.data);
+    paginate(resp.data);
     const newCategories = resp.data.results.map((result: any)=>{
       return result.category;
     })
     setCategories([...new Set(newCategories)]);
     setIsLoading(false);
   }
-
+  
   useEffect(() =>{
     getProducts();
   },[]);
 
+  useEffect(()=>{
+    if(originalProduct.status === 'success'){
+      paginate(originalProduct);
+    }
+  },[itemOffset]);
+
+  function paginate(items:any){
+    const endOffset = itemOffset + itemsPerPage;
+    //Generate data according to items per page.....
+    const currentItems = items.results.slice(itemOffset, endOffset);
+    console.log(currentItems);
+    //Calculate total page..............
+    setPageCount(Math.ceil(items.results.length / itemsPerPage));
+
+    setProducts((prev:any)=>{
+      return {...prev, results:currentItems, count: currentItems.length}
+    });
+  }
+  
   const handleChange = (e: any) =>{
     setProduct((prev:any)=>{
       return {
@@ -102,6 +131,10 @@ const Products=()=> {
       };
     })
   }
+
+
+
+
 
   const deleteProduct = async (e: any, id: string) =>{
     e.preventDefault();
@@ -199,6 +232,12 @@ const Products=()=> {
     setProduct(product);
   }
 
+  const handlePageChange = (event:any) => {
+    const newOffset = (event.selected * itemsPerPage) % originalProduct.results.length;
+    console.log(newOffset);
+    setItemOffset(newOffset);
+  };
+
 
 
   return (
@@ -253,6 +292,26 @@ const Products=()=> {
           <ProductFormModal open={open} handleClose={handleClose} categories={categories}
           handleChange={handleChange} handleSubmit={handleSubmit} isSpinning={isSpinning}
           edit={edit} product={product} handleUpdate={handleUpdate}/>
+
+        <ReactPaginate
+        previousLabel="Previous"
+        nextLabel="Next"
+        pageClassName="page-item"
+        pageLinkClassName="page-link"
+        previousClassName="page-item"
+        previousLinkClassName="page-link"
+        nextClassName="page-item"
+        nextLinkClassName="page-link"
+        breakLabel="..."
+        breakClassName="page-item"
+        breakLinkClassName="page-link"
+        pageCount={pageCount}
+        marginPagesDisplayed={2}
+        pageRangeDisplayed={5}
+        onPageChange={handlePageChange}
+        containerClassName="pagination"
+        activeClassName="active"
+      />
           </Container>
           </>
         )
