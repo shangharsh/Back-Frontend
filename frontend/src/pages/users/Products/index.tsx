@@ -3,22 +3,28 @@ import {useState, useEffect} from 'react';
 import { getData } from "../../../services/axios.service";
 import { Col, Row } from "react-bootstrap";
 import ProductList from "../../../components/user/ProductList";
+import Loader from "../../../components/Loader";
 
 
 const UserProducts = () => {
     const [products, setProducts] = useState<any>({});
+    const [isLoading, setIsLoading] = useState(false);
 
     const getproducts = async () => {
+        setIsLoading(true);
         const resp = await getData('/product');
         setProducts(resp.data);
+        setIsLoading(false);
+
     }
 
     useEffect(()=> {
         getproducts();
     }, []);
   return (
-    <>
-    <NavbarComponent/>
+      <>
+      <NavbarComponent/>
+    {isLoading ? (<Loader/>) : (<>
     {
         products.status === 'success' &&(
             <Row>
@@ -33,6 +39,7 @@ const UserProducts = () => {
                 }
             </Row>
     )}
+    </>)}
     </>
   );
 };

@@ -7,10 +7,10 @@ import Avatar from '@mui/material/Avatar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import { red } from '@mui/material/colors';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import ShareIcon from '@mui/icons-material/Share';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import Rating from '@mui/material/Rating';
 import moment from 'moment';
+import { BsFillCartCheckFill } from 'react-icons/bs';
 
 const ProductList = ({product}: any) => {
   return (
@@ -22,12 +22,12 @@ const ProductList = ({product}: any) => {
           </Avatar>
         }
         action={
-          <IconButton aria-label="settings">
-            <MoreVertIcon />
+          <IconButton aria-label="add to cart">
+            <BsFillCartCheckFill/>
           </IconButton>
         }
         title={product.name}
-        subheader={moment(product.createdAt).format('YYYY-MM-DD')}
+        subheader={moment(product.createdAt).format('lll')}
       />
       <CardMedia
         component="img"
@@ -37,17 +37,17 @@ const ProductList = ({product}: any) => {
       />
       <CardContent>
         <Typography variant="body2" color="text.secondary">
-        {product.description}
+        {product.description.slice(0,23)+"..."}
         </Typography>
+        <Typography variant="body2" color="text.secondary">
+        Rs. {product.price}
+        </Typography>
+        <Rating name='read-only' value={product.averageRating} precision={0.5} readOnly/>
       </CardContent>
       <CardActions disableSpacing>
-        <IconButton aria-label="add to favorites">
-          <FavoriteIcon />
+        <IconButton aria-label="view">
+          <VisibilityIcon />
         </IconButton>
-        <IconButton aria-label="share">
-          <ShareIcon />
-        </IconButton>
-        
       </CardActions>
     </Card>
   );
